@@ -1,180 +1,33 @@
-Ini adalah aplikasi chat yang menggunakan tRPC
+# 🚀 Laporan Proyek Nest.js
 
-# Install Git
+<p align="center">
+  <a href="http://nestjs.com/" target="blank">
+    <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  </a>
+</p>
 
-Download dan install git untuk yang belum install [Link Git](https://git-scm.com/downloads)
+## Deskripsi Proyek
+Lab Backend adalah proyek backend berbasis Node.js dan NestJS yang menyediakan API untuk memproses data, mengelola pengguna, serta mendukung komunikasi real-time dengan WebSocket.
 
-Kemudian configurasi username dan email git anda dengan cara berikut 
+## ✨ Fitur Utama
+- CRUD Data Pengguna
+- Autentikasi dan Otorisasi JWT
+- Dokumentasi API menggunakan Swagger
+- Komunikasi real-time menggunakan WebSocket
+- Manajemen database dengan PostgreSQL
 
-```
-git config --global user.name = [username github]
-git config --global user.email = [email github]     
-```
-
-
-
-# Cloning Repo
-
-Untuk mengcloning repo ini, anda harus masuk ke command prompt/terminal, lalu ketik 
-```
-git clone https://github.com/Frasydi/chat-App-With-tRPC
-```
-
-Jika sudah selesai, masuk ke foldernya dengan mengetik di terminal 
-```
-cd chat-App-With-tRPC
-```
-
-# Install Module dan konfigurasi database
-Untuk menginstall module, kalian cukup mengetik
-```
-yarn install
-```
-
-Dan untuk menginisialisasi database
-```
-yarn database
-```
-
-# Jalankan aplikasi
-cukup ketikkan
-```
-yarn build
-yarn start
-```
-
-# Menggunakan database lain
-
-Jika ingin menggunakan database yang lain, masuk ke folder backend, lalu ikuti langkah-langkah berikut
->Untuk masuk ke folder backend ketik perintah '`cd packages/backend`'
-
-1. Rubah nilai dari DATABASE_URL di file .env
-
-
-.env
-```env
-
-DATABASE_URL = [url dari database]
-
-```
-
-2. Kemudian masuk ke folder prisma, lalu buka file `schema.prisma`
-
-```prisma
-
-datasource db {
-  provider = "tipe dari databasemu(seperti postgre, mariadb, sqlite,atau mysql)"
-  url      = env("DATABASE_URL")
-}
-
-```
-
-3. setelah itu ketik perintah berikut 
-```terminal
-npx prisma generate
-```
-
-# Menambah Router
-untuk menambah router pada backend, cukup masuk ke folder backend, lalu ikuti langkah-langkah berikut
-
-1. buka trRouter.ts
-
-trRouter.ts
-
-```typescript
-const tRouter =  t.router({
-    //...router
-})
-```
-masukkan router anda ke dalam data json dari t.router()
-
-contoh
-
-trRouter.ts
-
-```typescript
-const tRouter = t.router({
-    namaRouter : t.procedure.
-    input(z.string()).
-    query() // atau t.procedure.input().mutation() untuk input data ke database
-})
-```
->z.string() maksudnya bahwa inputan yang dibolehkan hanyalah string. Anda dapat menggunakan z.object({tes:z.string()}) untuk hanya membolehkan object dengan property tes supaya bisa diinput, baca dokumentasi z.string di [sini](https://zod.dev/?id=introduction)
-
->query berarti menampilkan data, mutation berarti memasukkan data, 
-untuk lebih jelasnya kalian bisa baca dokumentasinya di [sini](https://trpc.io/docs/quickstart)
-
-# Menggunakan backend ini di frontend
-
-Untuk menggunakan backend ini di aplikasi Anda. Pertama-tama buatlah sebuah folder(terserah namanya apa) lalu ikuti langkah-langkah berikut
-
-1. Inisialisasi NPM dengan command
-```
-npm init -y
-```
-
-2. ketik perintah berikut di terminal
-```
-npm install @trpc/client ts-node
-```
-3. Buat file index.ts, lalu ketik kode berikut
-
-```typescript
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-
-
-const trpc = createTRPCProxyClient<any>({
-  links: [
-    httpBatchLink({
-      url: 'http://localhost:8000/trpc',
-    }),
-  ],
-});
-```
-masuk ke package json lalu rubah isi dari propery script menjadi berikut 
-
-```json
-"scripts": {
-    "start": "ts-node index",
-  },
-```
-
-4. setelah itu inisialisasi typescript menggunakan command 
-```
-tsc init
-```
-
-5. Masuk lagi ke index.ts dan masukkan kode berikut
-
-```typescript 
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-
-
-const trpc = createTRPCProxyClient<any>({
-  links: [
-    httpBatchLink({
-      url: 'http://localhost:8000/trpc',
-    }),
-  ],
-});
-
-trpc.namadarirouterkalian.query()
-
-```
-
->Router yang saya buat, hampir semuanya memerlukan cookie. Jadi alangkah baiknya jika kalian membuat aplikasi web untuk menggunakan backend ini
-
-# Diagram Router 
-
-
+## 📂 Struktur Folder Proyek
+![Image](https://github.com/user-attachments/assets/7d6fcfb4-1713-4634-998c-2fc23102d2d5)
+Lihat penjelasan lengkap setiap file proyek ini di [roadmap.sh](https://roadmap.sh/r/lab-yrg3x).
+## Diagram Alur (swagger)
 ```mermaid
 ---
-title: Get User
+title: Get Mahasiswa
 ---
 stateDiagram-v2
-    Input : String uuid
-    result : {\nmsg sebagai objek dari User,\n code = 200,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
+    Input : String 
+    result : {\njika code respon = 200,\n status = true\n maka ditampilkan info berupa (nim, nama, jurusan, kelas, jenis_kelamin, dan foto_profile)}
+    resultFailed : {\n status = false\n maka ditampilkan pesan error "Mahasiswa dengan nim ini sudah ada"}
 
     [*] --> Input 
     Input --> success 
@@ -185,64 +38,155 @@ stateDiagram-v2
 
 ```mermaid
 ---
-title: searchUser
+title: Get Mahasiswa/search
 ---
 stateDiagram-v2
-    cookie : Cookie(token)
-    result : {\nmsg sebagai objek dari User,\n code = 200,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    find : Mencari User melalui uuid dari\ntoken yang sudah didecoding
-    [*] --> cookie
-    cookie --> auth()
-    auth() --> failed
-    auth() --> success
-    success --> find
-    find --> failed
-    find --> successFind
-    successFind --> result
+    Input : String 
+    result : {\njika code respon = 200,\n status = true\n maka ditampilkan info berupa (nim, nama, jurusan, kelas, jenis_kelamin, dan foto_profile)}
+    resultFailed : {\n status = false\n maka ditampilkan daftar kosong"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
     failed --> resultFailed 
 ```
 
 ```mermaid
 ---
-title: Login
+title: Get Mahasiswa{nim}/foto
 ---
 stateDiagram-v2
-    input : input(object(username as string, password as string))
-    setToken : nge set cookie[token]
-    result : {\nmsg sebagai objek dari Token,\n status = true\n}
-    resultFailed : {\nmsg as string,\n status = false\n}
-    [*] --> input
-    input --> login()
-    login() --> failedLogin
-    failedLogin --> resultFailed
-    login() --> successLogin
-    successLogin --> setToken
-    setToken --> result
-    
-```
-```mermaid
----
-title: createUser
----
-stateDiagram-v2
-    input : input(object(username as string, password as string))
-    result : {\nmsg sebagai objek dari User,\n status = true\n}
-    resultFailed : {\nmsg as string, \ncode => 400,\n status = false\n}
-    [*] --> input
-    input --> createUser()
-    createUser() --> failed
-    failed --> resultFailed
-    createUser() --> success
+    Input : String
+    Input : File
+    result : {\njika code respon = 201,\n status = true\n maka ditampilkan nama file foto}
+    resultFailed : {\n code respon = 400, \n status = false\n maka ditampilkan pesan error "file tidak boleh kosong"}
+
+    [*] --> Input 
+    Input --> success 
     success --> result
-    
+    Input --> failed
+    failed --> resultFailed 
 ```
+
 ```mermaid
 ---
-title: auth
+title: Get Mahasiswa{nim}
 ---
 stateDiagram-v2
-    cookie : Cookie[token]
+    Input : String
+    result : {\njika code respon = 200,\\n status = true\n maka ditampilkan info berupa (nim, nama, jurusan, kelas, jenis_kelamin, dan foto_profile)}
+    resultFailed : {\n code respon = 404, \n status = false\n maka ditampilkan pesan error "tidak menemukan nim"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: Get /profile/{id}
+---
+stateDiagram-v2
+    Input : Number
+    result : {\njika code respon = 200,\\n status = true\n maka ditampilkan info berupa (nim, nama, jurusan, kelas, jenis_kelamin, dan foto_profile)}
+    resultFailed : {\n code respon = 500, \n status = false\n maka ditampilkan pesan error "internal server error"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: Get /auth
+---
+stateDiagram-v2
+    Input : Number
+    result : {\njika code respon = 200,\\n status = true\n maka berhasil di autentikasi}
+    resultFailed : {\n code respon = 401, \n status = false\n maka ditampilkan pesan error "Authorization header is missing"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: Post /register
+---
+stateDiagram-v2
+    Input : String @unique
+    result : {\njika code respon = 200,\\n status = true\n  maka ditampilkan info berupa (id, username, password, role, dan foto_profile)}
+    resultFailed : {\n code respon = 400, \n status = false\n maka ditampilkan pesan error "User sudah digunakan"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: Post /login
+---
+stateDiagram-v2
+    Input : String @unique
+    result : {\njika code respon = 201,\\n status = true\n  maka ditampilkan info berupa (token, id, username, role, dan foto_profile)}
+    resultFailed : {\n code respon = 400, \n status = false\n maka ditampilkan pesan error "Bad request"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: Post /mahasiswa/{nim}/upload
+---
+stateDiagram-v2
+    Input : String
+    result : {\njika code respon = 201,\\n status = true\n  maka ditampilkan file foto}
+    resultFailed : {\n code respon = 400, \n status = false\n maka ditampilkan pesan error "file tidak boleh kosong"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: Post /mahasiswa
+---
+stateDiagram-v2
+    Input : String
+    result : {\njika code respon = 201,\\n status = true\n  maka ditampilkan info berupa (token, id, username, role, dan foto_profile)}
+    resultFailed : {\n code respon = 400, \n status = false\n maka ditampilkan pesan error "mahasiswa dengan nim ini sudah ada"}
+
+    [*] --> Input 
+    Input --> success 
+    success --> result
+    Input --> failed
+    failed --> resultFailed 
+```
+
+```mermaid
+---
+title: authorizer
+---
+stateDiagram-v2
+    value : Cookie[token]
     resultFailed : {msg as string, status = false}
     result : {msg as object\n(username as string,\nuuid as string)}
     [*] --> cookie
@@ -254,172 +198,145 @@ stateDiagram-v2
 
 ```mermaid
 ---
-title: getAllUser
+title: Delete /mahasiswa/{nim}
 ---
 stateDiagram-v2
-    cookie : cookie[token]
-    result : {\nmsg sebagai array objek dari User,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    getAllUser : parameter(string uuid),\n mendapatkan semua user milik orang lain,\n kecuali user sendiri
+    Input : String
+    result : {\njika code respon = 200,\\n status = true\n  maka berhasil menghapus nim}
+    resultFailed : {\n code respon = 404, \n status = false\n maka ditampilkan pesan error "tidak menemukan nim"}
 
-    [*] --> cookie 
-    cookie --> auth()
-    auth() --> failed : unauthorized
-    auth() --> successAuth : authorized
-    successAuth --> getAllUser
-    getAllUser --> success
-    getAllUser --> failed : serverError
+    [*] --> Input 
+    Input --> success 
     success --> result
+    Input --> failed
     failed --> resultFailed 
 ```
 
 ```mermaid
 ---
-title: getAllChat
+title: Put 
 ---
 stateDiagram-v2
-    cookie : cookie[token]
-    result : {\nmsg sebagai array objek dari Chat,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    getAllChat : parameter(uuid2 as string),\n mendapatkan chat dari user ini \n dengan user orang lain dari uuidnya
+    Input : String
+    result : {\njika code respon = 200,\\n status = true\n  maka berhasil mengupdate nim}
+    resultFailed : {\n code respon = 500, \n status = false\n maka ditampilkan pesan error "internal server error"}
 
-    [*] --> cookie 
-    cookie --> auth()
-    auth() --> failed : unauthorized
-    auth() --> successAuth : authorized
-    successAuth --> getAllChat
-    getAllChat --> success
-    getAllChat --> failed : serverError
+    [*] --> Input 
+    Input --> success 
     success --> result
+    Input --> failed
     failed --> resultFailed 
-```
-```mermaid
----
-title: SendChat
----
-stateDiagram-v2
-    cookie : cookie[token]
-    result : {\nmsg as string,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    sendChat : parameter(object(uuid2 as string, text as string)),\n mengirimkan chat dari user ini \n ke user orang lain dari uuidnya
-
-    [*] --> cookie 
-    cookie --> auth()
-    auth() --> failed : unauthorized
-    auth() --> successAuth : authorized
-    successAuth --> sendChat
-    sendChat --> success
-    sendChat --> failed : serverError
-    success --> result
-    failed --> resultFailed 
-```
-
-```mermaid
----
-title: deleteChat
----
-stateDiagram-v2
-    cookie : cookie[token]
-    result : {\nmsg as string,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    deleteChat : parameter(object(uuid2 as string, id as number)),\n menghapus chat melalui id chat dari user ini \n ke user orang lain dari uuidnya
-
-    [*] --> cookie 
-    cookie --> auth()
-    auth() --> failed : unauthorized
-    auth() --> successAuth : authorized
-    successAuth --> deleteChat
-    deleteChat --> success
-    deleteChat --> failed : serverError
-    success --> result
-    failed --> resultFailed 
-```
-
-```mermaid
----
-title: deleteChat
----
-stateDiagram-v2
-    cookie : cookie[token]
-    result : {\nmsg as string,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    deleteChat : parameter(object(uuid2 as string, id as number)),\n menghapus chat melalui id chat dari user ini \n ke user orang lain dari uuidnya
-
-    [*] --> cookie 
-    cookie --> auth()
-    auth() --> failed : unauthorized
-    auth() --> successAuth : authorized
-    successAuth --> deleteChat
-    deleteChat --> success
-    deleteChat --> failed : serverError
-    success --> result
-    failed --> resultFailed 
-
-```
-
-```mermaid
----
-title: logout
----
-stateDiagram-v2
-  [*] --> menghapusToken()
-  menghapusToken() --> [*]
-```
-
-```mermaid
----
-title: deleteAccount
----
-stateDiagram-v2
-    cookie : cookie[token]
-    result : {\nmsg as string,\n status = true\n}
-    resultFailed : {\nmsg as string, \n status = false\n}
-    hapusAkun : parameter(uuid as string),\n menghapus chat melalui id chat dari user ini \n ke user orang lain dari uuidnya
-    hapusToken : hapus token
-    [*] --> cookie 
-    cookie --> auth()
-    auth() --> failed : unauthorized
-    auth() --> successAuth : authorized
-    successAuth --> hapusToken
-    hapusToken --> hapusAkun
-    successAuth --> hapusAkun
-    hapusAkun --> success
-    hapusAkun --> failed : serverError
-    success --> result
-    failed --> resultFailed 
-
 ```
 
 # Diagram Schema
-
 ```mermaid
 ---
 title: Chat App DB Schema
 ---
 classDiagram
+  class Mahasiswa {
+    +string nim
+    +string nama
+    +string jurusan
+    +string kelas
+    +jenis_kelamin jenis_kelamin
+    +string foto_profile
+  }
   class User {
-    +string uuid
-    +string username 
-    +string password
-    +getUserfromuid(string uuid) 
-    +createUsername(object(username:string, password:string))
-    +getAllUser(uuid:string)
-    +searchUser(uuid:string,search:string)
-    +login(object(username:string, password:string))
-    +hapusAkun(uuid:string)
-
+    Int id 
+    String username     
+    String password 
+    role Role
+    String foto_profile
   }
-  class Chat {
-    String from 
-    String to     
-    String? text 
-    String? image  
-    DateTime date  
-    +getChat(object(uuid1:string,uuid2:string))
-    +createChat(object(uuid1:string,uuid2:string, +text:string))
-    +deletePesan(id:number, who : string)
-    +kirimGambar(imageName:string, imageBuffer:string, from:string, to : string, text : string)
-  }
-
-  User <--> Chat
 ```
+
+## 💻 Tech Stack
+### Client:  
+- *Swagger*: Untuk mendokumentasikan dan menguji API.
+- *Socket.io*: Library JavaScript untuk koneksi WebSocket ke server.
+
+### Server:  
+- *Node.js*: Runtime JavaScript untuk backend.
+- *NestJS*: Framework backend dengan arsitektur modular.
+- *PostgreSQL*: Database relasional untuk menyimpan data.
+- *Socket.io*: Digunakan untuk komunikasi real-time.
+
+## 🛠 Instalasi Proyek
+
+### Prasyarat  
+Pastikan telah menginstal:  
+- [Node.js](https://nodejs.org/)
+- [PostgreSQL](https://www.postgresql.org/)
+
+### Langkah-langkah Instalasi 
+1. Clone repository:
+   bash
+   git clone https://github.com/username/repo-name.git
+   
+2. Pindah ke direktori proyek:
+   bash
+   cd Lab-Backend
+   
+3. Install semua dependency:
+   bash
+   npm install
+   
+4. Salin file konfigurasi environment:
+   bash
+   cp .env.example .env
+   
+   Sesuaikan variabel di .env, misalnya:
+   bash
+   DATABASE_URL=postgres://user:password@localhost:5432/db_name
+   JWT_SECRET=your_jwt_secret
+   PORT=3000
+   
+5. Jalankan server:
+   bash
+   npm run start
+   
+6. Akses aplikasi di http://localhost:3000
+
+## 📦 Instalasi Library Tambahan 
+- *NestJS WebSocket dan Socket.io:*  
+  bash
+  npm install @nestjs/websockets @nestjs/platform-socket.io socket.io
+  
+- *Autentikasi JWT:*  
+  bash
+  npm install @nestjs/jwt passport-jwt
+  
+- *PostgreSQL dan TypeORM:*  
+  bash
+  npm install @nestjs/typeorm pg typeorm   
+  
+- *Swagger untuk Dokumentasi API:*  
+  bash
+  npm install @nestjs/swagger swagger-ui-express
+  
+
+## 📖 Cara Menjalankan Proyek
+Swagger digunakan untuk mendokumentasikan dan menguji API.
+Jalankan proyek dengan perintah:
+bash
+npm run start:dev
+
+Akses Swagger di:
+bash
+http://localhost:3000/api-docs
+
+
+## 📌 Kesimpulan
+Latihan menggunakan NestJS memberikan pemahaman tentang struktur proyek modular, pemanfaatan dependency injection, serta pemisahan logika dalam Controller dan Service. Penggunaan DTO membantu dalam validasi data, sementara Prisma ORM mempermudah pengelolaan database. Implementasi WebSockets memungkinkan komunikasi real-time, dan fitur authentication dengan JWT meningkatkan keamanan aplikasi. Dengan middleware, guards, dan modularisasi, NestJS menjadi framework yang efisien, scalable, dan mudah dikelola untuk pengembangan backend.
+
+## 💡 Support
+Nest adalah proyek open-source berlisensi MIT. Untuk mendukung pengembangan lebih lanjut, silakan kunjungi [NestJS Support](https://docs.nestjs.com/support).
+
+## 🌐 Stay in Touch
+- *Website*: [nestjs.com](https://nestjs.com/)
+- *Twitter*: [@nestframework](https://twitter.com/nestframework)
+- *Author*: [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+
+## 📜 License
+Nest dilisensikan di bawah [MIT License](https://github.com/nestjs/nest/blob/master/LICENSE).
