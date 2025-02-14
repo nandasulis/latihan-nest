@@ -14,4 +14,7 @@ export class User {
 
     @Expose()
     role : Role;
+
+    @Expose()
+    foto_profile : string;
 }

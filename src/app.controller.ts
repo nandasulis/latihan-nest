@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { CreateMahasiswaDTO } from './dto/create-mahasiswa.dto';
 import { RegisterUserDTO } from './dto/register-user.dto';
 import { plainToInstance } from 'class-transformer';
@@ -8,13 +8,10 @@ import { User } from './entity/user.entity';
 import { Response } from 'express';
 import { UserDecorator } from './user.decorator';
 import { AuthGuard } from './auth.guard';
-
-
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class AppController {
-
-
 
   constructor(private readonly appService: AppService) { }
 
@@ -34,7 +31,7 @@ export class AppController {
     const result = await this.appService.login(data)
     res.cookie("token", result.token)
 
-    result.user = plainToInstance(User, result.user)
+    result.user = plainToInstance(User, { ...result.user, foto_profile: result.user.foto_profile || '' })
 
     return result
   }
@@ -80,5 +77,34 @@ export class AppController {
     return this.appService.updateMahasiswa(nim, data)
   }
 
+  @Get('mahasiswa/search')
+  async searchMahasiswa(@Query('nim') nim?: string) {
+    return this.appService.searchMahasiswa(nim);
+  }
 
+  @Post('mahasiswa/:nim/upload')
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  
+  @UseInterceptors(FileInterceptor(`file`))
+  async uploadMahasiswaFoto(@UploadedFile() file: Express.Multer.File, @Param('nim') nim: string) {
+    if (!file) throw new BadRequestException('File tidak boleh kosong');
+    return this.appService.uploadMahasiswaFoto(file, nim);
+  }
+
+  @Get('mahasiswa/:nim/foto')
+  async getMahasiswaFoto(@Param('nim') nim: string, @Res() res: Response) {
+    const filename = await this.appService.getMahasiwaFoto(nim);
+    return res.sendFile(filename, { root: 'uploads' });
+  }
 }
