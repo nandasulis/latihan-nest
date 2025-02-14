@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Chat</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+    <div class="w-full max-w-4xl h-[90vh] bg-white flex shadow-lg rounded-lg overflow-hidden">
+
+        <!-- Sidebar -->
+        <div class="w-1/3 bg-gray-200 p-4 flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-700">Users Online</h2>
+                <ul id="user-list" class="mt-2 space-y-2"></ul>
+            </div>
+            <div class="flex flex-col space-y-2">
+                <button onclick="switchToGroup()" class="w-full bg-gray-500 text-white p-2 rounded">Group Chat</button>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="w-2/3 flex flex-col">
+            <div class="p-4 bg-blue-500 text-white font-bold text-lg" id="chat-header">Select a user to chat</div>
+
+            <div id="chat-box-container" class="p-4 flex-1 overflow-y-auto space-y-3 bg-gray-100"></div>
+
+            <div id="typing-indicator" class="p-2 text-gray-500 italic hidden">User is typing...</div>
+
+            <div class="p-4 bg-white border-t flex gap-2">
+                <input id="message" type="text" placeholder="Type a message..." class="flex-1 p-2 border rounded"
+                    oninput="onTyping()">
+                <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded hidden"
+                    id="private-send-btn">Send</button>
+                <button onclick="joinGroup()" class="bg-green-500 text-white px-4 py-2 rounded hidden"
+                    id="join-group-btn">Join Group Chat</button>
+                <button onclick="sendGroupMessage()" class="bg-green-500 text-white px-4 py-2 rounded hidden"
+                    id="group-send-btn">Send to Group</button>
+            </div>
+        </div>
+    </div>
+    <!-- <button onclick="logout()" class="bg-red-500 text-white p-2 rounded">Logout</button> -->
+
+    <script>
+        const socket = io('http://localhost:3000', { path: '/socket' });
+        // let currentUser = prompt("Enter your username:");
+        // Cek apakah user sudah login
+        const token = localStorage.getItem('token');
+        const currentUser = localStorage.getItem('username');
+
+        if (!token || !currentUser) {
+            window.location.href = "login.html"; // Redirect jika belum login
+        }
+        let inGroup = false;
+        let isGroupChat = false;
+        let privateChats = {};
+        let selectedUser = null;
+        let typingTimeout;
+
+
+        socket.emit('set-username', { username: currentUser });
+
+        // Typing indicator
+        function onTyping() {
+            if (!selectedUser) return;
+
+            socket.emit('typing', { to: selectedUser });
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing-stopped', { to: selectedUser });
+            }, 1000);
+        }
+
+        socket.on('typing', (data) => {
+            if (data.to === selectedUser && !isGroupChat) {
+                document.getElementById('typing-indicator').textContent = `${selectedUser} is typing...`;
+                document.getElementById('typing-indicator').classList.remove("hidden");
+            }
+        });
+
+        socket.on('typing-stopped', (data) => {
+            if (data.to === selectedUser && !isGroupChat) {
+                document.getElementById('typing-indicator').classList.add("hidden");
+            }
+        });
+
+        function sendMessage() {
+            if (!selectedUser) return;
+
+            const message = document.getElementById('message').value.trim();
+            if (message) {
+                socket.emit('private-message', { to: selectedUser, message });
+
+                if (!privateChats[selectedUser]) privateChats[selectedUser] = [];
+                privateChats[selectedUser].push({ sender: currentUser, message });
+
+                renderChat(selectedUser);
+                document.getElementById('message').value = '';
+                document.getElementById('typing-indicator').classList.add("hidden");
+            }
+        }
+
+        function sendGroupMessage() {
+            if (!isGroupChat || !inGroup) return;
+
+            const message = document.getElementById('message').value.trim();
+            if (message) {
+                socket.emit('group-message', { message });
+                document.getElementById('message').value = '';
+            }
+        }
+
+        function joinGroup() {
+            socket.emit('join-group');
+        }
+
+        function switchToGroup() {
+            isGroupChat = true;
+            selectedUser = null;
+            document.getElementById('chat-header').textContent = "Group Chat";
+            document.getElementById('private-send-btn').classList.add("hidden");
+            document.getElementById('message').disabled = false;
+
+            if (inGroup) {
+                document.getElementById('join-group-btn').classList.add("hidden");
+                document.getElementById('group-send-btn').classList.remove("hidden");
+            } else {
+                document.getElementById('join-group-btn').classList.remove("hidden");
+                document.getElementById('group-send-btn').classList.add("hidden");
+            }
+
+            renderChat("Group");
+        }
+
+        function startPrivateChat(username) {
+            isGroupChat = false;
+            selectedUser = username;
+            document.getElementById('chat-header').textContent = `${username}`;
+            document.getElementById('private-send-btn').classList.remove("hidden");
+            document.getElementById('message').disabled = false;
+            document.getElementById('join-group-btn').classList.add("hidden");
+            document.getElementById('group-send-btn').classList.add("hidden");
+
+            renderChat(username);
+        }
+
+        socket.on('chat-receive', (data) => {
+            if (data.showName) {
+                addMessageToChat("Group", data.from, data.message);
+            } else {
+                addMessageToChat(selectedUser, "", data.message);
+            }
+        });
+
+        socket.on('user-list', (users) => {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = "";
+
+            users.forEach(user => {
+                if (user !== currentUser) {
+                    const userItem = document.createElement('li');
+                    userItem.textContent = user;
+                    userItem.className = "p-2 bg-white rounded shadow text-gray-700 cursor-pointer hover:bg-gray-300";
+                    userItem.onclick = () => startPrivateChat(user);
+                    userList.appendChild(userItem);
+                }
+            });
+        });
+
+        socket.on('group-joined', () => {
+            alert("You joined the group chat!");
+            inGroup = true;
+            switchToGroup();
+        });
+
+        function addMessageToChat(chatKey, sender, message) {
+            if (!privateChats[chatKey]) privateChats[chatKey] = [];
+            privateChats[chatKey].push({ sender, message });
+            renderChat(chatKey);
+        }
+
+        function renderChat(chatKey) {
+            const chatBox = document.getElementById('chat-box-container');
+            chatBox.innerHTML = "";
+
+            if (!privateChats[chatKey]) return;
+
+            privateChats[chatKey].forEach(msg => {
+                if (!msg.message) return;
+
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `inline-block max-w-fit p-3 rounded-lg shadow flex items-start`;
+
+                if (msg.sender === currentUser) {
+                    messageBubble.classList.add('bg-blue-500', 'text-white', 'ml-auto');
+                } else {
+                    messageBubble.classList.add('bg-gray-300', 'text-black', 'mr-auto');
+                }
+
+                messageBubble.innerHTML = msg.message;
+                chatBox.appendChild(messageBubble);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = "login.html";
+        }
+
+    </script>
+</body>
+
+</html>
