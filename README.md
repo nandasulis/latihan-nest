@@ -341,13 +341,3 @@ Nest adalah proyek open-source berlisensi MIT. Untuk mendukung pengembangan lebi
 ## 📜 License
 Nest dilisensikan di bawah [MIT License](https://github.com/nestjs/nest/blob/master/LICENSE).
 
-
-
-```mermaid
-graph TD;
-    A[Start] --> B{Decision};
-    B -->|Yes| C[Process 1];
-    B -->|No| D[Process 2];
-    C --> E[End];
-    D --> E
-
